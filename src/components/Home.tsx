@@ -11,7 +11,7 @@ const Home = () => (
   <React.Fragment>
     <Header />
     {/*<Features />*/}
-    <Showcases />
+    {/*<Showcases />*/}
     {/*<Testimonials />
     <CallToAction />*/}
     <Footer />

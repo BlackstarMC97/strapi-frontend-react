@@ -11323,8 +11323,9 @@ header.masthead:before {
   opacity: 0.75;
 }
 header.masthead h1, header.masthead .h1 {
-  font-size: 2.25rem;
-  line-height: 80px;
+  /*font-size: 2.25rem;*/
+  font-size: 1.5rem;
+  line-height: 60px;
 }
 @media (min-width: 768px) {
   /*header.masthead {
@@ -11332,7 +11333,8 @@ header.masthead h1, header.masthead .h1 {
     padding-bottom: 12rem;
   }*/
   header.masthead h1, header.masthead .h1 {
-    font-size: 3.25rem;
+    /*font-size: 3.25rem;*/
+    font-size: 2.75rem;
   }
 }
 
@@ -11442,6 +11444,9 @@ a[href^="https://elfsight.com/whatsapp-chat-widget/?utm_source=websites&utm_medi
   .full-height {
     height: auto;
   }
+  .logo-front {
+    width: 250px;
+  }
 }
 
 .react-tel-input .form-control {
@@ -11455,3 +11460,10 @@ a[href^="https://elfsight.com/whatsapp-chat-widget/?utm_source=websites&utm_medi
 .item.item-highlighted {
   background-color: #eee;
 }
+
+.showcase-text > h2 {
+  font-size: 1.25rem !important;
+  font-weight: bolder;
+  min-height: 75px;
+}
+
