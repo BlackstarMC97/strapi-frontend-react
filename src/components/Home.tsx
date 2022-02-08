@@ -4,7 +4,8 @@ import Header from './Header';
 //import CallToAction from './CallToAction';
 //import Features from './Features';
 import Footer from './Footer';
-import Showcases from './Showcases';
+//import Showcases from './Showcases';
+import Testimonials from './Testimonials';
 //import Testimonials from './Testimonials';
 
 const Home = () => (
@@ -14,6 +15,7 @@ const Home = () => (
     {/*<Showcases />*/}
     {/*<Testimonials />
     <CallToAction />*/}
+    <Testimonials />
     <Footer />
   </React.Fragment>
 );

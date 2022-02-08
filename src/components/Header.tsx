@@ -6,6 +6,9 @@ import 'react-phone-input-2/lib/style.css'
 import Autocomplete from 'react-autocomplete';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ReCAPTCHA from "react-google-recaptcha";
+// @ts-ignore
+import { CookieBanner } from '@palmabit/react-cookie-law';
 
 const Header = () => {
     const [modal, setModal] = React.useState<boolean>(false);
@@ -13,6 +16,7 @@ const Header = () => {
     const [modal3, setModal3] = React.useState<boolean>(false);
     const [phone, setPhone] = React.useState<string>("");
     const [email, setEmail] = React.useState<string>("");
+    const [message, setMessage] = React.useState<string>("");
     const [departureTown, setDepartureTown] = React.useState<string>("");
     const [arrivalTown, setArrivalTown] = React.useState<string>("");
     const [goodsType, setGoodsType] = React.useState<string>("Conteneur");
@@ -21,6 +25,7 @@ const Header = () => {
     const [cities, setCities] = React.useState<any>([]);
     const [show, setShow] = React.useState<any>(false);
     const [load, setLoad] = React.useState<any>(false);
+    const [captcha, setCaptcha] = React.useState<string | null>(null);
 
     var requestTimer: any = null;
 
@@ -54,23 +59,11 @@ const Header = () => {
       });
     }
   
-    /*function getDestinations(name: string) {
-      fetch("https://api.roadgoat.com/api/v2/destinations/auto_complete?q="+name, {
-        "method": "GET",
-        "headers": {
-          'Authorization': 'Basic ' + btoa('85bc91b49169164a5a21e18b68bfed8d:8cc06532d1fb907599b2c4c8dbaa4f77')
-        }
-      })
-      .then(response => response.json())
-      .then(response => {
-        //console.log(response.data);
-        setCities(response.data);
-      })
-      .catch(err => {
-        console.error(err);
-      });
-    }*/
-  
+    function onChange(value: any) {
+      console.log("Captcha value:", value);
+      setCaptcha(value);
+    }
+
     function fakeRequest(value: any, cb: any) {
       if (value.length > 2)
         return setTimeout(cb, 500, value ? getDestinationsReturned(value) : console.log("Check"));
@@ -81,97 +74,125 @@ const Header = () => {
     }
   
     function sendContactFormRedirect() {
-      if (phone !== "" && email !== "") {
-        if (validMail(email)) {
-          setLoad(true);
-          var myHeaders = new Headers();
-          myHeaders.append("Accept", "*/");
-          myHeaders.append("Content-Type", "application/json");
-          fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
-            method: "POST",
-            body: JSON.stringify({ phoneNumber: phone, email: email }),
-            //mode: "no-cors",
-            //headers: myHeaders
-          }).then(response => response.json()).then(data => {
-            toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
-            window.location.href = "http://www.omnifreight.eu/";
-          }).catch(error => { 
-            setLoad(false);
-            toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
-          });        
+      if (captcha !== null) {
+        if (phone !== "" || email !== "") {
+          if (validMail(email)) {
+            setLoad(true);
+            var myHeaders = new Headers();
+            myHeaders.append("Accept", "*/");
+            myHeaders.append("Content-Type", "application/json");
+            fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
+              method: "POST",
+              body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: message }),
+              //mode: "no-cors",
+              //headers: myHeaders
+            }).then(response => response.json()).then(data => {
+              toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+              window.location.href = "http://www.omnifreight.eu/";
+            }).catch(error => { 
+              setLoad(false);
+              toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+            });        
+          }
+          else {
+            toast.info("L'adresse mail n'est pas correcte, vérifiez là.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+          }
         }
         else {
-          toast.info("L'adresse mail n'est pas correcte, vérifiez là.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+          toast.info("Un ou plusieurs champs sont vides, remplissez les.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
         }
       }
       else {
-        toast.info("Un ou plusieurs champs sont vides, remplissez les.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+        toast.info("Veuillez cocher le captcha.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
       }
     }
   
     function sendContactForm() {
-      if (phone !== "" && email !== "") {
-        if (validMail(email)) {
-          setLoad(true);
-          var myHeaders = new Headers();
-          myHeaders.append("Accept", "*/");
-          myHeaders.append("Content-Type", "application/json");
-          fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
-            method: "POST",
-            body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: goodsType !== "Conteneur" ? goodsType : goodsType + "; Nombre : " + containerNumber + "; Hauteur : " + containerHeight }),
-          }).then(response => response.json()).then(data => {
-            setShow(true);
-            setLoad(false);
-            toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
-          }).catch(error => { 
-            setLoad(false);
-            toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
-          });        
+      if (captcha !== null) {
+        if (phone !== "" || email !== "") {
+          if (validMail(email)) {
+            setLoad(true);
+            var myHeaders = new Headers();
+            myHeaders.append("Accept", "*/");
+            myHeaders.append("Content-Type", "application/json");
+            fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
+              method: "POST",
+              body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: message }),
+            }).then(response => response.json()).then(data => {
+              setShow(true);
+              setLoad(false);
+              toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+            }).catch(error => { 
+              setLoad(false);
+              toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+            });        
+          }
+          else {
+            toast.info("L'adresse mail n'est pas correcte, vérifiez là.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+          }
         }
         else {
-          toast.info("L'adresse mail n'est pas correcte, vérifiez là.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+          toast.info("Un ou plusieurs champs sont vides, remplissez les.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
         }
       }
       else {
-        toast.info("Un ou plusieurs champs sont vides, remplissez les.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+        toast.info("Veuillez cocher le captcha.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
       }
     }
     
     function sendQuotationForm() {
-      if (phone !== "" && email !== "" && arrivalTown !== "" && departureTown !== "") {
-        if (validMail(email)) {
-          setLoad(true);
-          var myHeaders = new Headers();
-          myHeaders.append("Accept", "*/");
-          myHeaders.append("Content-Type", "application/json");
-          fetch("https://omnifreightinfo.azurewebsites.net/api/Quotation", {
-            method: "POST",
-            body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: goodsType !== "Conteneur" ? goodsType : goodsType + "; Nombre : " + containerNumber + "; Hauteur : " + containerHeight }),
-            //mode: "no-cors",
-            //headers: myHeaders
-          }).then(response => response.json()).then(data => {
-            setShow(true);
-            setLoad(false);
-            toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
-          }).catch(error => { 
-            setLoad(false);
-            toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
-          });        
+      if (captcha !== null) {
+        if ((phone !== "" && arrivalTown !== "" && departureTown !== "") || (email !== "" && arrivalTown !== "" && departureTown !== "")) {
+          if (validMail(email)) {
+            setLoad(true);
+            var myHeaders = new Headers();
+            myHeaders.append("Accept", "*/");
+            myHeaders.append("Content-Type", "application/json");
+            fetch("https://omnifreightinfo.azurewebsites.net/api/Quotation", {
+              method: "POST",
+              body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: message }),
+              //body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: goodsType !== "Conteneur" ? goodsType : goodsType + "; Nombre : " + containerNumber + "; Hauteur : " + containerHeight }),
+              //mode: "no-cors",
+              //headers: myHeaders
+            }).then(response => response.json()).then(data => {
+              setShow(true);
+              setLoad(false);
+              toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+            }).catch(error => { 
+              setLoad(false);
+              toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+            });        
+          }
+          else {
+            toast.info("L'adresse mail n'est pas correcte, vérifiez là.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+          }
         }
         else {
-          toast.info("L'adresse mail n'est pas correcte, vérifiez là.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+          toast.info("Un ou plusieurs champs sont vides, remplissez les.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
         }
       }
       else {
-        toast.info("Un ou plusieurs champs sont vides, remplissez les.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+        toast.info("Veuillez cocher le captcha.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
       }
     }
     
-    return (<header className="masthead">
+    return (
+      <header className="masthead">
+        <CookieBanner
+          message="Ce site utilise des cookies. En continuant d'utiliser ce site, vous acceptez leur utilisation. Pour plus de détails, veuillez consulter notre"
+          policyLink="/privacy-policy"
+          wholeDomain={true}
+          acceptButtonText="J'ai compris"
+          privacyPolicyLinkText="politique de confidentialité"
+          onAccept = {() => {}}
+          onAcceptPreferences = {() => {}}
+          onAcceptStatistics = {() => {}}
+          onAcceptMarketing = {() => {}}
+        />
         <div className="container position-relative">
           <div className="row justify-content-center align-items-center text-center text-white full-height">
             <div className="col-xl-10 mt-3">
-              <div className="bg-white mb-0 mb-md-4 pt-2">
+              <div className="bg-white mb-0 mb-md-4 pt-1">
                 <img className="logo-front" src="./assets/img/logo-omnifreight-big.png" alt="omnifreight pro" />
               </div>
               {/* Page heading*/}
@@ -235,7 +256,7 @@ const Header = () => {
                 </div>
                 <div className="col-12 col-md-6">
                   <FormGroup>
-                    <Label for="departureTown">Ville de départ</Label>
+                    <Label for="departureTown">Ville et pays de départ des marchandises</Label>
                     <Autocomplete
                       menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
                       wrapperStyle={{ display: "block", zIndex: -9999 }}
@@ -269,7 +290,7 @@ const Header = () => {
                 </div>
                 <div className="col-12 col-md-6">
                   <FormGroup>
-                    <Label for="arrivalTown">Ville d'arrivée</Label>
+                    <Label for="arrivalTown">Ville d'arrivée et pays des marchandises</Label>
                     <Autocomplete
                       menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
                       wrapperStyle={{ display: "block" }}
@@ -300,7 +321,7 @@ const Header = () => {
                     />
                   </FormGroup>
                 </div>
-                <div className="col-12">
+                {/*<div className="col-12">
                   <FormGroup>
                     <Label for="goodsType">Type de marchandise</Label>
                     <Input type="select" name="goodsType" id="goodsType" value={goodsType} onChange={(e: any) => setGoodsType(e.target.value)}>
@@ -310,9 +331,9 @@ const Header = () => {
                       <option value="RoRo">RoRo</option>
                     </Input>
                   </FormGroup>
-                </div>
+                </div>*/}
                 
-                {
+                {/*
                   goodsType == "Conteneur" ? 
                   <React.Fragment>
                     <div className="col-12 col-md-6">
@@ -331,7 +352,17 @@ const Header = () => {
                       </FormGroup>
                     </div>
                   </React.Fragment> : null
-                }
+                */}
+                <div className="col-12 col-md-12">
+                  <FormGroup>
+                    <Label for="message">Entrer les détails sur votre besoin</Label>
+                    <Input type="textarea" name="message" id="message" value={message} onChange={(e: any) => { setMessage(e.target.value); }} placeholder="Entrer votre message" />
+                  </FormGroup>
+                </div>
+                <ReCAPTCHA
+                  sitekey="6LcapWceAAAAAGab4DRszmgw_uSBgNFSivuYY9kI"
+                  onChange={onChange}
+                />
               </div>
             </Form>
           </ModalBody>
@@ -361,6 +392,50 @@ const Header = () => {
                     <Input type="email" name="email" id="email" value={email} onChange={(e: any) => { setEmail(e.target.value); }} placeholder="Entrer votre adresse email" />
                   </FormGroup>
                 </div>
+                <div className="col-12 col-md-6">
+                  <FormGroup>
+                    <Label for="departureTown">Ville et pays de départ des marchandises</Label>
+                    <Autocomplete
+                      menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
+                      wrapperStyle={{ display: "block", zIndex: -9999 }}
+                      wrapperProps={{ className: "wrapper-styling" }}
+                      renderInput={function(props: any) {
+                        return <input type="text" name="departureTown" id="departureTown" className="form-control" placeholder="Entrer la ville de départ de la marchandise" {...props} />
+                      }}
+                      getItemValue={(item: any) => { console.log(cities); return item.attributes !== undefined ? item.attributes.name : "Chargement en cours..."; }}
+                      items={cities}
+                      renderItem={(item: any, isHighlighted: any) => (
+                        <div style={{ padding: "6px 12px" }} className={`item ${isHighlighted ? 'item-highlighted' : ''}`} key={item.id}>
+                          {item.attributes.name}
+                        </div>
+                      )}
+                      value={departureTown}
+                      onChange={(event: any, value: any) => {
+                        setDepartureTown(value);
+                        clearTimeout(requestTimer);
+                        requestTimer = fakeRequest(value, (items: any) => {
+                          //setCities(items);
+                          console.log(items);
+                        })
+                      }}
+                      onSelect={(value: any, item: any) => {
+                        // set the menu to only the selected item
+                        setDepartureTown(value);
+                        setCities([item]);
+                      }}
+                    />
+                  </FormGroup>
+                </div>
+                <div className="col-12 col-md-12">
+                  <FormGroup>
+                    <Label for="message">Entrer les détails sur votre besoin</Label>
+                    <Input type="textarea" name="message" id="message" value={message} onChange={(e: any) => { setMessage(e.target.value); }} placeholder="Entrer votre message" />
+                  </FormGroup>
+                </div>
+                <ReCAPTCHA
+                  sitekey="6LcapWceAAAAAGab4DRszmgw_uSBgNFSivuYY9kI"
+                  onChange={onChange}
+                />
               </div>
             </Form>
           </ModalBody>
@@ -387,6 +462,50 @@ const Header = () => {
                     <Input type="email" name="email" id="email" value={email} onChange={(e: any) => { setEmail(e.target.value); }} placeholder="Entrer votre adresse email" />
                   </FormGroup>
                 </div>
+                <div className="col-12 col-md-6">
+                  <FormGroup>
+                    <Label for="departureTown">Ville et pays de départ des marchandises</Label>
+                    <Autocomplete
+                      menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
+                      wrapperStyle={{ display: "block", zIndex: -9999 }}
+                      wrapperProps={{ className: "wrapper-styling" }}
+                      renderInput={function(props: any) {
+                        return <input type="text" name="departureTown" id="departureTown" className="form-control" placeholder="Entrer la ville de départ de la marchandise" {...props} />
+                      }}
+                      getItemValue={(item: any) => { console.log(cities); return item.attributes !== undefined ? item.attributes.name : "Chargement en cours..."; }}
+                      items={cities}
+                      renderItem={(item: any, isHighlighted: any) => (
+                        <div style={{ padding: "6px 12px" }} className={`item ${isHighlighted ? 'item-highlighted' : ''}`} key={item.id}>
+                          {item.attributes.name}
+                        </div>
+                      )}
+                      value={departureTown}
+                      onChange={(event: any, value: any) => {
+                        setDepartureTown(value);
+                        clearTimeout(requestTimer);
+                        requestTimer = fakeRequest(value, (items: any) => {
+                          //setCities(items);
+                          console.log(items);
+                        })
+                      }}
+                      onSelect={(value: any, item: any) => {
+                        // set the menu to only the selected item
+                        setDepartureTown(value);
+                        setCities([item]);
+                      }}
+                    />
+                  </FormGroup>
+                </div>
+                <div className="col-12 col-md-12">
+                  <FormGroup>
+                    <Label for="message">Entrer les détails sur votre besoin</Label>
+                    <Input type="textarea" name="message" id="message" value={message} onChange={(e: any) => { setMessage(e.target.value); }} placeholder="Entrer votre message" />
+                  </FormGroup>
+                </div>
+                <ReCAPTCHA
+                  sitekey="6LcapWceAAAAAGab4DRszmgw_uSBgNFSivuYY9kI"
+                  onChange={onChange}
+                />
               </div>
             </Form>
           </ModalBody>

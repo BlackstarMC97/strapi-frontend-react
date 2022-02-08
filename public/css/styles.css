@@ -11467,3 +11467,16 @@ a[href^="https://elfsight.com/whatsapp-chat-widget/?utm_source=websites&utm_medi
   min-height: 75px;
 }
 
+.font-text-role::first-letter {
+  text-transform: capitalize;
+}
+
+.react-cookie-law-msg {
+  display: inline-block !important;
+}
+.react-cookie-law-container {
+  max-width: 1260px !important;
+}
+.react-cookie-law-manage-btn {
+  display: none !important;
+}
