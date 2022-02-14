@@ -19,16 +19,31 @@ const Header = () => {
     const [message, setMessage] = React.useState<string>("");
     const [departureTown, setDepartureTown] = React.useState<string>("");
     const [arrivalTown, setArrivalTown] = React.useState<string>("");
-    const [goodsType, setGoodsType] = React.useState<string>("Conteneur");
+    const [goodsType, setGoodsType] = React.useState<string>("");
+    const [type, setType] = React.useState<string>("");
     const [containerNumber, setContainerNumber] = React.useState<number>(1);
-    const [containerHeight, setContainerHeight] = React.useState<string>("20 pieds");
     const [cities, setCities] = React.useState<any>([]);
     const [show, setShow] = React.useState<any>(false);
     const [load, setLoad] = React.useState<any>(false);
     const [captcha, setCaptcha] = React.useState<string | null>(null);
+    const [check1, setCheck1] = React.useState<any>(false);
+    const [check2, setCheck2] = React.useState<any>(false);
+    const [check3, setCheck3] = React.useState<any>(false);
+    const [check4, setCheck4] = React.useState<any>(false);
 
     var requestTimer: any = null;
 
+    function resetFields() {
+      setPhone("");
+      setEmail("");
+      setContainerNumber(1);
+      setGoodsType("");
+      setMessage("");
+      setDepartureTown("");
+      setArrivalTown("");
+      setLoad(false);
+    }
+    
     function toggle() {
       setModal(!modal);
     }
@@ -83,12 +98,13 @@ const Header = () => {
             myHeaders.append("Content-Type", "application/json");
             fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
               method: "POST",
-              body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: message }),
-              //mode: "no-cors",
-              //headers: myHeaders
-            }).then(response => response.json()).then(data => {
+              body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: message }),
+              headers: myHeaders
+            }).then(data => {
               toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
-              window.location.href = "http://www.omnifreight.eu/";
+              resetFields();
+              //window.location.href = "http://www.omnifreight.eu/";
+              window.open("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", '_blank');
             }).catch(error => { 
               setLoad(false);
               toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
@@ -111,14 +127,21 @@ const Header = () => {
       if (captcha !== null) {
         if (phone !== "" || email !== "") {
           if (validMail(email)) {
+            var msg = "Je souhaite avoir des informations sur les sujets suivants : ";
+            if (check1) { msg += "Expéditions maritimes; " }
+            if (check2) { msg += "Expéditions aériennes; " }
+            if (check3) { msg += "Devenir revendeur; " }
+            if (check4) { msg += "Opportunités d'emploi. " }
+            console.log(msg);
             setLoad(true);
             var myHeaders = new Headers();
             myHeaders.append("Accept", "*/");
             myHeaders.append("Content-Type", "application/json");
             fetch("https://omnifreightinfo.azurewebsites.net/api/QuotationBasic", {
               method: "POST",
-              body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: message }),
-            }).then(response => response.json()).then(data => {
+              body: JSON.stringify({ phoneNumber: phone, email: email, goodsType: msg+message }),
+              headers: myHeaders
+            }).then(data => {
               setShow(true);
               setLoad(false);
               toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
@@ -151,10 +174,8 @@ const Header = () => {
             fetch("https://omnifreightinfo.azurewebsites.net/api/Quotation", {
               method: "POST",
               body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: message }),
-              //body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: goodsType !== "Conteneur" ? goodsType : goodsType + "; Nombre : " + containerNumber + "; Hauteur : " + containerHeight }),
-              //mode: "no-cors",
-              //headers: myHeaders
-            }).then(response => response.json()).then(data => {
+              headers: myHeaders
+            }).then(data => {
               setShow(true);
               setLoad(false);
               toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
@@ -225,7 +246,7 @@ const Header = () => {
                   <div className="card-body showcase-text text-dark">
                     <h2>« Vous souhaitez voir plus d’informations sur Omnifreight ? »</h2>
                     <div className="mt-4">
-                      <Button color="primary" className="btn btn-primary custom-btn" onClick={toggle3}>Obtenir plus d'informations</Button>
+                      <Button color="primary" className="btn btn-primary custom-btn" onClick={toggle3}>Télécharger notre brochure</Button>
                     </div>
                   </div>
                 </div>
@@ -235,7 +256,7 @@ const Header = () => {
         </div>
 
         <Modal isOpen={modal} toggle={toggle} size="lg">
-          <ModalHeader toggle={toggle} style={{ fontWeight: "bold" }}>Formulaire de contact</ModalHeader>
+          <ModalHeader toggle={toggle} style={{ fontWeight: "bold" }}>Demande de cotation</ModalHeader>
           <ModalBody>
             {
               show ? <Alert className="mb-3" color="info">Votre message a bien été envoyé, nous vous recontactons dans quelques instants pour vous envoyer votre cotation.</Alert> : null
@@ -290,7 +311,7 @@ const Header = () => {
                 </div>
                 <div className="col-12 col-md-6">
                   <FormGroup>
-                    <Label for="arrivalTown">Ville d'arrivée et pays des marchandises</Label>
+                    <Label for="arrivalTown">Ville et pays d'arrivée des marchandises</Label>
                     <Autocomplete
                       menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
                       wrapperStyle={{ display: "block" }}
@@ -321,38 +342,22 @@ const Header = () => {
                     />
                   </FormGroup>
                 </div>
-                {/*<div className="col-12">
+                <div className="col-12 col-md-6">
                   <FormGroup>
-                    <Label for="goodsType">Type de marchandise</Label>
-                    <Input type="select" name="goodsType" id="goodsType" value={goodsType} onChange={(e: any) => setGoodsType(e.target.value)}>
+                    <Label for="type">Type de cargaison</Label>
+                    <Input type="select" name="type" id="type" value={type} onChange={(e: any) => setType(e.target.value)}>
                       <option value="Conteneur">Conteneur</option>
-                      <option value="Conventionnel">Conventionnel</option>
-                      <option value="Vrac">Vrac</option>
+                      <option value="Conventionnel">Conventionnelle</option>
                       <option value="RoRo">RoRo</option>
                     </Input>
                   </FormGroup>
-                </div>*/}
-                
-                {/*
-                  goodsType == "Conteneur" ? 
-                  <React.Fragment>
-                    <div className="col-12 col-md-6">
-                      <FormGroup tag="fieldset" className="ml-1">
-                        <Label for="containerHeight">Hauteur du conteneur</Label>
-                          <FormGroup check className="mt-1">
-                            <Label className="mr-5" check><Input type="radio" name="radio1" checked={containerHeight === "20 pieds"} value={containerHeight} onChange={(e: any) => setContainerHeight("20 pieds")} />{' '}20 pieds</Label>
-                            <Label check><Input type="radio" name="radio1" checked={containerHeight === "40 pieds"} value={containerHeight} onChange={(e: any) => setContainerHeight("40 pieds")} />{' '}40 pieds</Label>
-                          </FormGroup>
-                      </FormGroup>
-                    </div>
-                    <div className="col-12 col-md-6">
-                      <FormGroup>
-                        <Label for="containerNumber">Nombre de conteneurs</Label>
-                        <Input type="number" min={0} max={10} name="containerNumber" id="containerNumber" value={containerNumber} onChange={(e: any) => { setContainerNumber(e.target.value); }} placeholder="Entrer le nombre de conteneurs" />
-                      </FormGroup>
-                    </div>
-                  </React.Fragment> : null
-                */}
+                </div>
+                <div className="col-12 col-md-6">
+                  <FormGroup>
+                    <Label for="qty">Quantité</Label>
+                    <Input type="number" name="qty" id="qty" value={containerNumber} onChange={(e: any) => { setContainerNumber(e.target.value); }} />
+                  </FormGroup>
+                </div>
                 <div className="col-12 col-md-12">
                   <FormGroup>
                     <Label for="message">Entrer les détails sur votre besoin</Label>
@@ -392,38 +397,23 @@ const Header = () => {
                     <Input type="email" name="email" id="email" value={email} onChange={(e: any) => { setEmail(e.target.value); }} placeholder="Entrer votre adresse email" />
                   </FormGroup>
                 </div>
-                <div className="col-12 col-md-6">
-                  <FormGroup>
-                    <Label for="departureTown">Ville et pays de départ des marchandises</Label>
-                    <Autocomplete
-                      menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
-                      wrapperStyle={{ display: "block", zIndex: -9999 }}
-                      wrapperProps={{ className: "wrapper-styling" }}
-                      renderInput={function(props: any) {
-                        return <input type="text" name="departureTown" id="departureTown" className="form-control" placeholder="Entrer la ville de départ de la marchandise" {...props} />
-                      }}
-                      getItemValue={(item: any) => { console.log(cities); return item.attributes !== undefined ? item.attributes.name : "Chargement en cours..."; }}
-                      items={cities}
-                      renderItem={(item: any, isHighlighted: any) => (
-                        <div style={{ padding: "6px 12px" }} className={`item ${isHighlighted ? 'item-highlighted' : ''}`} key={item.id}>
-                          {item.attributes.name}
-                        </div>
-                      )}
-                      value={departureTown}
-                      onChange={(event: any, value: any) => {
-                        setDepartureTown(value);
-                        clearTimeout(requestTimer);
-                        requestTimer = fakeRequest(value, (items: any) => {
-                          //setCities(items);
-                          console.log(items);
-                        })
-                      }}
-                      onSelect={(value: any, item: any) => {
-                        // set the menu to only the selected item
-                        setDepartureTown(value);
-                        setCities([item]);
-                      }}
-                    />
+                <div className="col-12">
+                  <FormGroup className="mb-1">
+                    <Label className="font-weight-bolder" for="subject">Sur quels sujets souhaitez vous avoir des informations ?</Label>
+                  </FormGroup>
+                  <FormGroup className="ml-1 mb-3" check>
+                    <Label className="d-block mb-2" check>
+                      <Input type="checkbox" value={check1} onChange={(e: any) => { setCheck1(e.target.value); console.log(e.target.checked); }} /> Expéditions maritimes
+                    </Label>
+                    <Label className="d-block mb-2" check>
+                      <Input type="checkbox" value={check2} onChange={(e: any) => { setCheck2(e.target.value); console.log(e.target.checked); }} /> Expéditions aériennes
+                    </Label>
+                    <Label className="d-block mb-2" check>
+                      <Input type="checkbox" value={check3} onChange={(e: any) => { setCheck3(e.target.value); console.log(e.target.checked); }} /> Devenir revendeur
+                    </Label>
+                    <Label className="d-block mb-2" check>
+                      <Input type="checkbox" value={check4} onChange={(e: any) => { setCheck4(e.target.value); console.log(e.target.checked); }} /> Opportunités d'emploi
+                    </Label>
                   </FormGroup>
                 </div>
                 <div className="col-12 col-md-12">
@@ -462,40 +452,6 @@ const Header = () => {
                     <Input type="email" name="email" id="email" value={email} onChange={(e: any) => { setEmail(e.target.value); }} placeholder="Entrer votre adresse email" />
                   </FormGroup>
                 </div>
-                <div className="col-12 col-md-6">
-                  <FormGroup>
-                    <Label for="departureTown">Ville et pays de départ des marchandises</Label>
-                    <Autocomplete
-                      menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
-                      wrapperStyle={{ display: "block", zIndex: -9999 }}
-                      wrapperProps={{ className: "wrapper-styling" }}
-                      renderInput={function(props: any) {
-                        return <input type="text" name="departureTown" id="departureTown" className="form-control" placeholder="Entrer la ville de départ de la marchandise" {...props} />
-                      }}
-                      getItemValue={(item: any) => { console.log(cities); return item.attributes !== undefined ? item.attributes.name : "Chargement en cours..."; }}
-                      items={cities}
-                      renderItem={(item: any, isHighlighted: any) => (
-                        <div style={{ padding: "6px 12px" }} className={`item ${isHighlighted ? 'item-highlighted' : ''}`} key={item.id}>
-                          {item.attributes.name}
-                        </div>
-                      )}
-                      value={departureTown}
-                      onChange={(event: any, value: any) => {
-                        setDepartureTown(value);
-                        clearTimeout(requestTimer);
-                        requestTimer = fakeRequest(value, (items: any) => {
-                          //setCities(items);
-                          console.log(items);
-                        })
-                      }}
-                      onSelect={(value: any, item: any) => {
-                        // set the menu to only the selected item
-                        setDepartureTown(value);
-                        setCities([item]);
-                      }}
-                    />
-                  </FormGroup>
-                </div>
                 <div className="col-12 col-md-12">
                   <FormGroup>
                     <Label for="message">Entrer les détails sur votre besoin</Label>
@@ -510,8 +466,8 @@ const Header = () => {
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button color={!load ? "primary" : "secondary"} className="mr-3" onClick={sendContactFormRedirect} disabled={load === true}>Enregistrer</Button>
-            <Button color="secondary" onClick={toggle3}>Fermer</Button>
+            <Button color={!load ? "primary" : "secondary"} className="mr-3" onClick={sendContactFormRedirect} disabled={load === true}>Télécharger</Button>
+            {/*<Button color="secondary" onClick={toggle3}>Fermer</Button>*/}
           </ModalFooter>
         </Modal>
 
