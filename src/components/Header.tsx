@@ -34,7 +34,7 @@ const Header = () => {
     var requestTimer: any = null;
 
     function resetFields() {
-      setPhone("");
+      setPhone("237");
       setEmail("");
       setContainerNumber(1);
       setGoodsType("");
@@ -42,6 +42,13 @@ const Header = () => {
       setDepartureTown("");
       setArrivalTown("");
       setLoad(false);
+      setModal(false);
+      //setModal2(false);
+      setModal3(false);
+      setCheck1(false);
+      setCheck2(false);
+      setCheck3(false);
+      setCheck4(false);
     }
     
     function toggle() {
@@ -91,7 +98,7 @@ const Header = () => {
     function sendContactFormRedirect() {
       if (captcha !== null) {
         if (phone !== "" || email !== "") {
-          if (validMail(email)) {
+          if (email == "" || email !== "" && validMail(email)) {
             setLoad(true);
             var myHeaders = new Headers();
             myHeaders.append("Accept", "*/");
@@ -103,12 +110,11 @@ const Header = () => {
             }).then(data => {
               toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
               resetFields();
-              //window.location.href = "http://www.omnifreight.eu/";
               window.open("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", '_blank');
             }).catch(error => { 
               setLoad(false);
               toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
-            });        
+            });
           }
           else {
             toast.info("L'adresse mail n'est pas correcte, vérifiez là.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
@@ -126,7 +132,7 @@ const Header = () => {
     function sendContactForm() {
       if (captcha !== null) {
         if (phone !== "" || email !== "") {
-          if (validMail(email)) {
+          if (email == "" || email !== "" && validMail(email)) {
             var msg = "Je souhaite avoir des informations sur les sujets suivants : ";
             if (check1) { msg += "Expéditions maritimes; " }
             if (check2) { msg += "Expéditions aériennes; " }
@@ -144,6 +150,7 @@ const Header = () => {
             }).then(data => {
               setShow(true);
               setLoad(false);
+              resetFields();
               toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
             }).catch(error => { 
               setLoad(false);
@@ -166,7 +173,7 @@ const Header = () => {
     function sendQuotationForm() {
       if (captcha !== null) {
         if ((phone !== "" && arrivalTown !== "" && departureTown !== "") || (email !== "" && arrivalTown !== "" && departureTown !== "")) {
-          if (validMail(email)) {
+          if (email == "" || email !== "" && validMail(email)) {
             setLoad(true);
             var myHeaders = new Headers();
             myHeaders.append("Accept", "*/");
@@ -179,6 +186,7 @@ const Header = () => {
               setShow(true);
               setLoad(false);
               toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
+              resetFields();
             }).catch(error => { 
               setLoad(false);
               toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
@@ -397,22 +405,22 @@ const Header = () => {
                     <Input type="email" name="email" id="email" value={email} onChange={(e: any) => { setEmail(e.target.value); }} placeholder="Entrer votre adresse email" />
                   </FormGroup>
                 </div>
-                <div className="col-12">
+                <div className="col-12 col-md-8">
                   <FormGroup className="mb-1">
                     <Label className="font-weight-bolder" for="subject">Sur quels sujets souhaitez vous avoir des informations ?</Label>
                   </FormGroup>
                   <FormGroup className="ml-1 mb-3" check>
                     <Label className="d-block mb-2" check>
-                      <Input type="checkbox" value={check1} onChange={(e: any) => { setCheck1(e.target.value); console.log(e.target.checked); }} /> Expéditions maritimes
+                      <Input type="checkbox" checked={check1} value={check1} onChange={(e: any) => { setCheck1(e.target.value); console.log(e.target.checked); }} /> Expéditions maritimes
                     </Label>
                     <Label className="d-block mb-2" check>
-                      <Input type="checkbox" value={check2} onChange={(e: any) => { setCheck2(e.target.value); console.log(e.target.checked); }} /> Expéditions aériennes
+                      <Input type="checkbox" checked={check2} value={check2} onChange={(e: any) => { setCheck2(e.target.value); console.log(e.target.checked); }} /> Expéditions aériennes
                     </Label>
                     <Label className="d-block mb-2" check>
-                      <Input type="checkbox" value={check3} onChange={(e: any) => { setCheck3(e.target.value); console.log(e.target.checked); }} /> Devenir revendeur
+                      <Input type="checkbox" checked={check3} value={check3} onChange={(e: any) => { setCheck3(e.target.value); console.log(e.target.checked); }} /> Devenir revendeur
                     </Label>
                     <Label className="d-block mb-2" check>
-                      <Input type="checkbox" value={check4} onChange={(e: any) => { setCheck4(e.target.value); console.log(e.target.checked); }} /> Opportunités d'emploi
+                      <Input type="checkbox" checked={check4} value={check4} onChange={(e: any) => { setCheck4(e.target.value); console.log(e.target.checked); }} /> Opportunités d'emploi
                     </Label>
                   </FormGroup>
                 </div>
