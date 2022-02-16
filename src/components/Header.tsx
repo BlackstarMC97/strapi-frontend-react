@@ -110,7 +110,7 @@ const Header = () => {
             }).then(data => {
               toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
               resetFields();
-              window.open("https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", '_blank');
+              window.open("./assets/omnifreight_flyer.pdf", '_blank');
             }).catch(error => { 
               setLoad(false);
               toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
@@ -355,7 +355,7 @@ const Header = () => {
                     <Label for="type">Type de cargaison</Label>
                     <Input type="select" name="type" id="type" value={type} onChange={(e: any) => setType(e.target.value)}>
                       <option value="Conteneur">Conteneur</option>
-                      <option value="Conventionnel">Conventionnelle</option>
+                      <option value="Conventionnel">Conventionnel</option>
                       <option value="RoRo">RoRo</option>
                     </Input>
                   </FormGroup>
@@ -380,8 +380,8 @@ const Header = () => {
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button color={!load ? "primary" : "secondary"} className="mr-3" onClick={sendQuotationForm} disabled={load === true}>Enregistrer</Button>
-            <Button color="secondary" onClick={toggle}>Fermer</Button>
+            <Button color={!load ? "primary" : "secondary"} className="mr-3" onClick={sendQuotationForm} disabled={load === true}>Continuer</Button>
+            {/*<Button color="secondary" onClick={toggle}>Fermer</Button>*/}
           </ModalFooter>
         </Modal>
 
@@ -474,8 +474,8 @@ const Header = () => {
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button color={!load ? "primary" : "secondary"} className="mr-3" onClick={sendContactFormRedirect} disabled={load === true}>Télécharger</Button>
-            {/*<Button color="secondary" onClick={toggle3}>Fermer</Button>*/}
+            <Button color={!load ? "primary" : "secondary"} className="mr-3" onClick={sendContactFormRedirect} disabled={email === "" || !validMail(email)}>Télécharger</Button>
+            {/*<Button color="secondary" onClick={toggle3} disabled={email === "" || !validMail(email)}>Fermer</Button>*/}
           </ModalFooter>
         </Modal>
 
