@@ -53,7 +53,22 @@ const Showcases = () => {
       console.error(err);
     });
   }*/
-
+/*fetch("https://api.roadgoat.com/api/v2/destinations/auto_complete?q="+name, {
+        "method": "GET",
+        "headers": {
+          'Authorization': 'Basic ' + btoa('623f7e7c80a50b56cd575584c287b67e:b523b3924a4b9e7723dba68306785225')
+        }
+      })
+      .then(response => response.json())
+      .then(response => {
+        //console.log(response.data);
+        setCities(response.data);
+        return response.data;
+      })
+      .catch(err => {
+        console.error(err);
+      });*/
+      
   function getDestinationsReturned(name: string) {
     fetch("https://api.roadgoat.com/api/v2/destinations/auto_complete?q="+name, {
       "method": "GET",

@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { Button, Form, FormGroup, Label, Input, Modal, ModalHeader, ModalBody, ModalFooter, Alert } from 'reactstrap';
+import { Button, Form, FormGroup, Label, Input, Modal, ModalHeader, ModalBody, ModalFooter, Alert, ListGroup, ListGroupItem } from 'reactstrap';
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
-import Autocomplete from 'react-autocomplete';
+//import Autocomplete from 'react-autocomplete';
+import { useDebouncedCallback } from 'use-debounce';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ReCAPTCHA from "react-google-recaptcha";
+import OutsideClickHandler from 'react-outside-click-handler';
 // @ts-ignore
 import { CookieBanner } from '@palmabit/react-cookie-law';
 
@@ -20,9 +22,10 @@ const Header = () => {
     const [departureTown, setDepartureTown] = React.useState<string>("");
     const [arrivalTown, setArrivalTown] = React.useState<string>("");
     const [goodsType, setGoodsType] = React.useState<string>("");
-    const [type, setType] = React.useState<string>("");
+    const [type, setType] = React.useState<string>("Conteneur");
     const [containerNumber, setContainerNumber] = React.useState<number>(1);
     const [cities, setCities] = React.useState<any>([]);
+    const [cities2, setCities2] = React.useState<any>([]);
     const [show, setShow] = React.useState<any>(false);
     const [load, setLoad] = React.useState<any>(false);
     const [captcha, setCaptcha] = React.useState<string | null>(null);
@@ -30,8 +33,31 @@ const Header = () => {
     const [check2, setCheck2] = React.useState<any>(false);
     const [check3, setCheck3] = React.useState<any>(false);
     const [check4, setCheck4] = React.useState<any>(false);
-
-    var requestTimer: any = null;
+    //const [text, setText] = React.useState('Hello');
+    //const [value] = useDebounce(text, 1000);
+    //const [value1, setValue1] = React.useState<string>("");
+    //const [value2, setValue2] = React.useState<string>("");
+    const [loading, setLoading] = React.useState<any>(false);
+    const [loading2, setLoading2] = React.useState<any>(false);
+    
+    const debouncedDeparture = useDebouncedCallback((value) => { 
+      if (value !== "") {
+        getDestinationsReturned(value);
+      }
+      else {
+        setCities([]);
+      }
+    }, 1000);
+    const debouncedArrival = useDebouncedCallback((value) => { 
+      if (value !== "") {
+        getDestinationsReturned2(value);
+      }
+      else {
+        setCities2([]);
+      }
+    }, 1000);
+    
+    //var requestTimer: any = null;
 
     function resetFields() {
       setPhone("237");
@@ -64,20 +90,42 @@ const Header = () => {
     }
 
     function getDestinationsReturned(name: string) {
-      fetch("https://api.roadgoat.com/api/v2/destinations/auto_complete?q="+name, {
+      setLoading(true);
+      fetch("https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix="+name+"&sort=-population", {
         "method": "GET",
         "headers": {
-          'Authorization': 'Basic ' + btoa('85bc91b49169164a5a21e18b68bfed8d:8cc06532d1fb907599b2c4c8dbaa4f77')
+          "x-rapidapi-host": "wft-geo-db.p.rapidapi.com",
+          "x-rapidapi-key": "VTFclTfEVAmshQmaJNoPsbhlnoAcp1i978ojsnVvUKgKp4QiG6"
         }
       })
       .then(response => response.json())
       .then(response => {
-        //console.log(response.data);
         setCities(response.data);
-        return response.data;
+        setLoading(false);
       })
       .catch(err => {
         console.error(err);
+        setLoading(false);
+      });
+    }
+
+    function getDestinationsReturned2(name: string) {
+      setLoading2(true);
+      fetch("https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix="+name+"&sort=-population", {
+        "method": "GET",
+        "headers": {
+          "x-rapidapi-host": "wft-geo-db.p.rapidapi.com",
+          "x-rapidapi-key": "VTFclTfEVAmshQmaJNoPsbhlnoAcp1i978ojsnVvUKgKp4QiG6"
+        }
+      })
+      .then(response => response.json())
+      .then(response => {
+        setCities2(response.data);
+        setLoading2(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading2(false);
       });
     }
   
@@ -86,10 +134,14 @@ const Header = () => {
       setCaptcha(value);
     }
 
-    function fakeRequest(value: any, cb: any) {
-      if (value.length > 2)
-        return setTimeout(cb, 500, value ? getDestinationsReturned(value) : console.log("Check"));
-    }
+    /*function fakeRequest(value: any, cb: any) {
+      //console.log(value);
+      //console.log(cb);
+      if (value !== undefined) {
+        if (value.length > 2)
+          return setTimeout(cb, 1000, value ? getDestinationsReturned(value) : console.log("Check"));
+      }
+    }*/
   
     function validMail(mail: string) {
         return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
@@ -110,7 +162,8 @@ const Header = () => {
             }).then(data => {
               toast.success("Le message a été envoyé.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
               resetFields();
-              window.open("./assets/omnifreight_flyer.pdf", '_blank');
+              //window.open("./assets/omnifreight_flyer.pdf", '_blank');
+              download("./assets/omnifreight_flyer.pdf", "Flyer Omnifreight.png");
             }).catch(error => { 
               setLoad(false);
               toast.error("Une erreur est survenue.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
@@ -180,7 +233,7 @@ const Header = () => {
             myHeaders.append("Content-Type", "application/json");
             fetch("https://omnifreightinfo.azurewebsites.net/api/Quotation", {
               method: "POST",
-              body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: message }),
+              body: JSON.stringify({ phoneNumber: phone, email: email, departureCity: departureTown, arrivalCity: arrivalTown, goodsType: "Type de cargaison : " + type + "; Quantité : " + containerNumber + "; Message : " + message }),
               headers: myHeaders
             }).then(data => {
               setShow(true);
@@ -203,6 +256,13 @@ const Header = () => {
       else {
         toast.info("Veuillez cocher le captcha.", { position: "top-right", autoClose: 4000, hideProgressBar: true, closeOnClick: true, pauseOnHover: true, draggable: true, progress: undefined });
       }
+    }
+
+    function download(fileUrl: any, fileName: any) {
+      var a = document.createElement("a");
+      a.href = fileUrl;
+      a.setAttribute("download", fileName);
+      a.click();
     }
     
     return (
@@ -286,74 +346,39 @@ const Header = () => {
                 <div className="col-12 col-md-6">
                   <FormGroup>
                     <Label for="departureTown">Ville et pays de départ des marchandises</Label>
-                    <Autocomplete
-                      menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
-                      wrapperStyle={{ display: "block", zIndex: -9999 }}
-                      wrapperProps={{ className: "wrapper-styling" }}
-                      renderInput={function(props: any) {
-                        return <input type="text" name="departureTown" id="departureTown" className="form-control" placeholder="Entrer la ville de départ de la marchandise" {...props} />
-                      }}
-                      getItemValue={(item: any) => { console.log(cities); return item.attributes !== undefined ? item.attributes.name : "Chargement en cours..."; }}
-                      items={cities}
-                      renderItem={(item: any, isHighlighted: any) => (
-                        <div style={{ padding: "6px 12px" }} className={`item ${isHighlighted ? 'item-highlighted' : ''}`} key={item.id}>
-                          {item.attributes.name}
-                        </div>
-                      )}
-                      value={departureTown}
-                      onChange={(event: any, value: any) => {
-                        setDepartureTown(value);
-                        clearTimeout(requestTimer);
-                        requestTimer = fakeRequest(value, (items: any) => {
-                          //setCities(items);
-                          console.log(items);
-                        })
-                      }}
-                      onSelect={(value: any, item: any) => {
-                        // set the menu to only the selected item
-                        setDepartureTown(value);
-                        setCities([item]);
-                      }}
-                    />
+                    <Input type="text" name="departureTown" id="departureTown" value={departureTown} onChange={(e: any) => { setDepartureTown(e.target.value); debouncedDeparture(e.target.value); }} placeholder="Entrer la ville de départ de la marchandise" autoComplete="off" />
+                    <OutsideClickHandler onOutsideClick={() => { setCities([]); }}>
+                      <ListGroup className="custom-list-group">
+                        {
+                          loading ? <ListGroupItem className="py-2">Chargement en cours...</ListGroupItem>  :
+                          cities.map((elm: any, i: number) => {
+                            return <ListGroupItem key={"dz"+i} className="py-2 hover-light" onClick={(e: any) => { setDepartureTown(elm.city+", "+elm.country); setCities([]); }}>{elm.city + ", " + elm.country}</ListGroupItem>
+                          })
+                        }
+                      </ListGroup>
+                    </OutsideClickHandler>
                   </FormGroup>
                 </div>
                 <div className="col-12 col-md-6">
                   <FormGroup>
                     <Label for="arrivalTown">Ville et pays d'arrivée des marchandises</Label>
-                    <Autocomplete
-                      menuStyle={{ zIndex: 99999, border: "1px solid #ddd", position: "fixed" }}
-                      wrapperStyle={{ display: "block" }}
-                      renderInput={function(props: any) {
-                        return <input type="text" name="arrivalTown" id="arrivalTown" className="form-control" placeholder="Entrer la ville de départ de la marchandise" {...props} />
-                      }}
-                      getItemValue={(item: any) => { console.log(cities); return item.attributes !== undefined ? item.attributes.name : "Chargement en cours..."; }}
-                      items={cities}
-                      renderItem={(item: any, isHighlighted: any) => (
-                        <div style={{ padding: "6px 12px" }} className={`item ${isHighlighted ? 'item-highlighted' : ''}`} key={item.id}>
-                          {item.attributes.name}
-                        </div>
-                      )}
-                      value={arrivalTown}
-                      onChange={(event: any, value: any) => {
-                        setArrivalTown(value);
-                        clearTimeout(requestTimer);
-                        requestTimer = fakeRequest(value, (items: any) => {
-                          //setCities(items);
-                          console.log(items);
-                        })
-                      }}
-                      onSelect={(value: any, item: any) => {
-                        // set the menu to only the selected item
-                        setArrivalTown(value);
-                        setCities([item]);
-                      }}
-                    />
+                    <Input type="text" name="arrivalTown" id="arrivalTown" value={arrivalTown} onChange={(e: any) => { setArrivalTown(e.target.value); debouncedArrival(e.target.value); }} placeholder="Entrer la ville d'arrivée de la marchandise" autoComplete="off" />
+                    <OutsideClickHandler onOutsideClick={() => { setCities2([]); }}>
+                      <ListGroup className="custom-list-group">
+                        {
+                          loading2 ? <ListGroupItem className="py-2">Chargement en cours...</ListGroupItem>  :
+                          cities2.map((elm: any, i: number) => {
+                            return <ListGroupItem key={"ez"+i} className="py-2 hover-light" onClick={(e: any) => { setArrivalTown(elm.city+", "+elm.country); setCities2([]); }}>{elm.city + ", " + elm.country}</ListGroupItem>
+                          })
+                        }
+                      </ListGroup>
+                    </OutsideClickHandler>
                   </FormGroup>
                 </div>
                 <div className="col-12 col-md-6">
                   <FormGroup>
                     <Label for="type">Type de cargaison</Label>
-                    <Input type="select" name="type" id="type" value={type} onChange={(e: any) => setType(e.target.value)}>
+                    <Input type="select" name="type" id="type" value={type} onChange={(e: any) => { setType(e.target.value); console.log(e.target.value); }}>
                       <option value="Conteneur">Conteneur</option>
                       <option value="Conventionnel">Conventionnel</option>
                       <option value="RoRo">RoRo</option>
@@ -368,7 +393,7 @@ const Header = () => {
                 </div>
                 <div className="col-12 col-md-12">
                   <FormGroup>
-                    <Label for="message">Entrer les détails sur votre besoin</Label>
+                    <Label for="message">Autres détails sur votre besoin</Label>
                     <Input type="textarea" name="message" id="message" value={message} onChange={(e: any) => { setMessage(e.target.value); }} placeholder="Entrer votre message" />
                   </FormGroup>
                 </div>
@@ -438,7 +463,8 @@ const Header = () => {
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button color={!load ? "primary" : "secondary"} className="mr-3" onClick={sendContactForm} disabled={load === true}>Enregistrer</Button>
+            <Button color={!load ? "primary" : "secondary"} className="mr-3" onClick={sendContactForm} disabled={load === true}>Continuer</Button>
+            {/*<Button color="success" onClick={() => { getCities("Paris") }}>Check 1-2</Button>*/}
             <Button color="secondary" onClick={toggle2}>Fermer</Button>
           </ModalFooter>
         </Modal>
@@ -458,12 +484,6 @@ const Header = () => {
                   <FormGroup>
                     <Label for="email">Email</Label>
                     <Input type="email" name="email" id="email" value={email} onChange={(e: any) => { setEmail(e.target.value); }} placeholder="Entrer votre adresse email" />
-                  </FormGroup>
-                </div>
-                <div className="col-12 col-md-12">
-                  <FormGroup>
-                    <Label for="message">Entrer les détails sur votre besoin</Label>
-                    <Input type="textarea" name="message" id="message" value={message} onChange={(e: any) => { setMessage(e.target.value); }} placeholder="Entrer votre message" />
                   </FormGroup>
                 </div>
                 <ReCAPTCHA

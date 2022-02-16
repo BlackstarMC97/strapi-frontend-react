@@ -11480,3 +11480,17 @@ a[href^="https://elfsight.com/whatsapp-chat-widget/?utm_source=websites&utm_medi
 .react-cookie-law-manage-btn {
   display: none !important;
 }
+
+.hover-light:hover {
+  background-color: #e5e5e5;
+  color: #000;
+  cursor: pointer;
+}
+.custom-list-group {
+  position: absolute;
+  width: calc(100% - 30px);
+  z-index: 100;
+}
+li.py-2.pointer.hover-light.list-group-item {
+  cursor: pointer;
+}
