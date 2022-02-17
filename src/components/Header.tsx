@@ -91,7 +91,7 @@ const Header = () => {
 
     function getDestinationsReturned(name: string) {
       setLoading(true);
-      fetch("https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix="+name+"&sort=-population", {
+      fetch("https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix="+name+"&sort=-population&languageCode=fr", {
         "method": "GET",
         "headers": {
           "x-rapidapi-host": "wft-geo-db.p.rapidapi.com",
@@ -111,7 +111,7 @@ const Header = () => {
 
     function getDestinationsReturned2(name: string) {
       setLoading2(true);
-      fetch("https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix="+name+"&sort=-population", {
+      fetch("https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=5&namePrefix="+name+"&sort=-population&languageCode=fr", {
         "method": "GET",
         "headers": {
           "x-rapidapi-host": "wft-geo-db.p.rapidapi.com",
@@ -393,7 +393,7 @@ const Header = () => {
                 </div>
                 <div className="col-12 col-md-12">
                   <FormGroup>
-                    <Label for="message">Autres détails sur votre besoin</Label>
+                    <Label for="message">Autres détails sur votre besoin (Optionnel)</Label>
                     <Input type="textarea" name="message" id="message" value={message} onChange={(e: any) => { setMessage(e.target.value); }} placeholder="Entrer votre message" />
                   </FormGroup>
                 </div>
@@ -411,7 +411,7 @@ const Header = () => {
         </Modal>
 
         <Modal isOpen={modal2} toggle={toggle2} size="lg">
-          <ModalHeader toggle={toggle2} style={{ fontWeight: "bold" }}>Formulaire de contact</ModalHeader>
+          <ModalHeader toggle={toggle2} style={{ fontWeight: "bold" }}>Contacter un responsable</ModalHeader>
           <ModalBody>
             {
               show ? <Alert className="mb-3" color="info">Votre message a bien été envoyé, vous serez contacté par un responsable Omnifreight dans les heures qui suivent.</Alert> : null
@@ -470,7 +470,7 @@ const Header = () => {
         </Modal>
 
         <Modal isOpen={modal3} toggle={toggle3} size="lg">
-          <ModalHeader toggle={toggle3} style={{ fontWeight: "bold" }}>Formulaire de contact</ModalHeader>
+          <ModalHeader toggle={toggle3} style={{ fontWeight: "bold" }}>Télécharger notre brochure</ModalHeader>
           <ModalBody>
             <Form>
               <div className="row">
