@@ -12,7 +12,8 @@ import OutsideClickHandler from 'react-outside-click-handler';
 // @ts-ignore
 import { CookieBanner } from '@palmabit/react-cookie-law';
 
-const Header = () => {
+const Header = ({data, url} : {data: any, url: string}) => {
+    //const [data, setData] = React.useState<any>(null);  
     const [modal, setModal] = React.useState<boolean>(false);
     const [modal2, setModal2] = React.useState<boolean>(false);
     const [modal3, setModal3] = React.useState<boolean>(false);
@@ -21,7 +22,7 @@ const Header = () => {
     const [message, setMessage] = React.useState<string>("");
     const [departureTown, setDepartureTown] = React.useState<string>("");
     const [arrivalTown, setArrivalTown] = React.useState<string>("");
-    const [goodsType, setGoodsType] = React.useState<string>("");
+    //const [goodsType, setGoodsType] = React.useState<string>("");
     const [type, setType] = React.useState<string>("Conteneur");
     const [containerNumber, setContainerNumber] = React.useState<number>(1);
     const [cities, setCities] = React.useState<any>([]);
@@ -33,12 +34,27 @@ const Header = () => {
     const [check2, setCheck2] = React.useState<any>(false);
     const [check3, setCheck3] = React.useState<any>(false);
     const [check4, setCheck4] = React.useState<any>(false);
-    //const [text, setText] = React.useState('Hello');
-    //const [value] = useDebounce(text, 1000);
-    //const [value1, setValue1] = React.useState<string>("");
-    //const [value2, setValue2] = React.useState<string>("");
     const [loading, setLoading] = React.useState<any>(false);
     const [loading2, setLoading2] = React.useState<any>(false);
+    
+    /*React.useEffect(() => {
+      getData();
+    }, []);
+
+    function getData() {
+      fetch("http://localhost:1337/api/landing-pages/1?populate=*", {
+        "method": "GET",
+        //"mode": "no-cors"
+      })
+      .then(response => response.json())
+      .then(response => {
+        console.log(response.data.attributes);
+        setData(response.data.attributes);
+      })
+      .catch(err => {
+        console.error(err);
+      });
+    }*/
     
     const debouncedDeparture = useDebouncedCallback((value) => { 
       if (value !== "") {
@@ -63,7 +79,7 @@ const Header = () => {
       setPhone("237");
       setEmail("");
       setContainerNumber(1);
-      setGoodsType("");
+      //setGoodsType("");
       setMessage("");
       setDepartureTown("");
       setArrivalTown("");
@@ -134,15 +150,6 @@ const Header = () => {
       setCaptcha(value);
     }
 
-    /*function fakeRequest(value: any, cb: any) {
-      //console.log(value);
-      //console.log(cb);
-      if (value !== undefined) {
-        if (value.length > 2)
-          return setTimeout(cb, 1000, value ? getDestinationsReturned(value) : console.log("Check"));
-      }
-    }*/
-  
     function validMail(mail: string) {
         return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()\.,;\s@\"]+\.{0,1})+([^<>()\.,;:\s@\"]{2,}|[\d\.]+))$/.test(mail);
     }
@@ -266,35 +273,31 @@ const Header = () => {
     }
     
     return (
-      <header className="masthead">
+      <header className="masthead" style={{ background: 'url("'+url + data.BackgroundImage.data.attributes.url+'") no-repeat center center', backgroundSize: "cover" }}>
         <CookieBanner
-          message="Ce site utilise des cookies. En continuant d'utiliser ce site, vous acceptez leur utilisation. Pour plus de détails, veuillez consulter notre"
-          policyLink="/privacy-policy"
+          message={data.PolicyMessage}
+          policyLink={data.PolicyLink}
           wholeDomain={true}
-          acceptButtonText="J'ai compris"
-          privacyPolicyLinkText="politique de confidentialité"
-          onAccept = {() => {}}
-          onAcceptPreferences = {() => {}}
-          onAcceptStatistics = {() => {}}
-          onAcceptMarketing = {() => {}}
+          acceptButtonText={data.PolicyButtonText}
+          privacyPolicyLinkText={data.PolicyLinkText}
         />
         <div className="container position-relative">
           <div className="row justify-content-center align-items-center text-center text-white full-height">
             <div className="col-xl-10 mt-3">
               <div className="bg-white mb-0 mb-md-4 pt-1">
-                <img className="logo-front" src="./assets/img/logo-omnifreight-big.png" alt="omnifreight pro" />
+                <img className="logo-front" src={url + data.LogoImage.data.attributes.url} alt="omnifreight pro" />
               </div>
               {/* Page heading*/}
-              <h1>Nous organisons l'expédition de vos marchandises à destination de l'Afrique depuis le monde entier !</h1>
+              <h1>{data.HeadTitle}</h1>
             </div>
 
             <div className="row my-3 my-md-0">
               <div className="col-12 col-md-4 my-2 my-md-0">
                 <div className="card bg-white rounded shadow border">
                   <div className="card-body showcase-text text-dark">
-                    <h2>« Vous souhaitez recevoir une cotation pour une expédition de marchandises ? »</h2>
+                    <h2>{data.Block1Title}</h2>
                     <div className="mt-4">
-                      <Button color="primary" className="btn btn-primary custom-btn" onClick={toggle}>Demander une cotation</Button>
+                      <Button color="primary" className="btn btn-primary custom-btn" onClick={toggle}>{data.Block1Button}</Button>
                     </div>
                   </div>
                 </div>
@@ -302,9 +305,9 @@ const Header = () => {
               <div className="col-12 col-md-4 my-2 my-md-0">
                 <div className="card bg-white rounded shadow border">
                   <div className="card-body showcase-text text-dark">
-                    <h2>« Vous souhaitez qu’un responsable Omnifreight vous contacte ? »</h2>
+                    <h2>{data.Block2Title}</h2>
                     <div className="mt-4">
-                      <Button color="primary" className="btn btn-primary custom-btn" onClick={toggle2}>Contacter un responsable</Button>
+                      <Button color="primary" className="btn btn-primary custom-btn" onClick={toggle2}>{data.Block2Button}</Button>
                     </div>
                   </div>
                 </div>
@@ -312,9 +315,9 @@ const Header = () => {
               <div className="col-12 col-md-4 my-2 my-md-0">
                 <div className="card bg-white rounded shadow border">
                   <div className="card-body showcase-text text-dark">
-                    <h2>« Vous souhaitez voir plus d’informations sur Omnifreight ? »</h2>
+                    <h2>{data.Block3Title}</h2>
                     <div className="mt-4">
-                      <Button color="primary" className="btn btn-primary custom-btn" onClick={toggle3}>Télécharger notre brochure</Button>
+                      <Button color="primary" className="btn btn-primary custom-btn" onClick={toggle3}>{data.Block3Button}</Button>
                     </div>
                   </div>
                 </div>
@@ -500,7 +503,7 @@ const Header = () => {
         </Modal>
 
         <ToastContainer />
-    </header>)
+    </header>) 
 };
 
 export default connect()(Header);
