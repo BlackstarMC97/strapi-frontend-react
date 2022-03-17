@@ -10,7 +10,7 @@ import Testimonials from './Testimonials';
 
 const Home = () => {
   const [data, setData] = React.useState<any>(null);
-  const backendUrl:string = "http://localhost:1337";
+  const backendUrl:string = "https://strapiapptest.herokuapp.com";
   
   React.useEffect(() => {
     getData();
